@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keuangan Pribadi - Aplikasi Pemula</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="app" id="app" hidden>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <i class="fas fa-wallet"></i>
+        <span>KeuanganKu</span>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-page="pemasukan">
+          <i class="fas fa-arrow-down"></i> Uang Masuk
+        </a>
+        <a href="#" class="nav-item" data-page="pengeluaran">
+          <i class="fas fa-arrow-up"></i> Uang Keluar
+        </a>
+        <a href="#" class="nav-item" data-page="laporan">
+          <i class="fas fa-chart-line"></i> Laporan
+        </a>
+        <a href="#" class="nav-item" data-page="wishlist">
+          <i class="fas fa-heart"></i> Wishlist
+        </a>
+        <a href="#" class="nav-item" data-page="catatan">
+          <i class="fas fa-sticky-note"></i> Catatan
+        </a>
+        <a href="#" class="nav-item" data-page="target">
+          <i class="fas fa-bullseye"></i> Target Tabungan
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="sidebar-action" id="changePasswordButton">
+          <i class="fas fa-key"></i> Ubah sandi
+        </button>
+        <small>Perubahan disimpan lokal dan disinkronkan ke Firebase saat online</small>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="header">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="header-right">
+          <small id="syncStatus" role="status" aria-live="polite">Memuat data tersimpan...</small>
+          <button class="btn btn-outline btn-sm" id="retrySyncButton" type="button" hidden>Coba lagi</button>
+          <span id="currentDate"></span>
+          <button class="btn btn-outline btn-sm" id="lockButton" type="button" title="Kunci aplikasi">
+            <i class="fas fa-lock"></i><span>Kunci</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page active">
+          <div class="cards">
+            <div class="card card-green">
+              <div class="card-icon"><i class="fas fa-arrow-down"></i></div>
+              <div class="card-info">
+                <span class="card-label">Total Masuk</span>
+                <span class="card-value" id="totalMasuk">Rp 0</span>
+              </div>
+            </div>
+            <div class="card card-red">
+              <div class="card-icon"><i class="fas fa-arrow-up"></i></div>
+              <div class="card-info">
+                <span class="card-label">Total Keluar</span>
+                <span class="card-value" id="totalKeluar">Rp 0</span>
+              </div>
+            </div>
+            <div class="card card-blue">
+              <div class="card-icon"><i class="fas fa-wallet"></i></div>
+              <div class="card-info">
+                <span class="card-label">Saldo</span>
+                <span class="card-value" id="saldo">Rp 0</span>
+              </div>
+            </div>
+            <div class="card card-purple">
+              <div class="card-icon"><i class="fas fa-piggy-bank"></i></div>
+              <div class="card-info">
+                <span class="card-label">Target Tabungan</span>
+                <span class="card-value" id="progressTarget">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <h3><i class="fas fa-history"></i> Transaksi Terakhir</h3>
+            <div id="recentTransactions" class="transaction-list">
+              <p class="empty">Belum ada transaksi</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- PEMASUKAN -->
+        <section id="pemasukan" class="page">
+          <div class="section-box">
+            <h3><i class="fas fa-plus-circle"></i> Tambah Uang Masuk</h3>
+            <form id="formPemasukan" class="form">
+              <div class="form-group">
+                <label>Jumlah (Rp)</label>
+                <input type="number" id="jumlahMasuk" placeholder="Contoh: 5000000" required min="1">
+              </div>
+              <div class="form-group">
+                <label>Sumber / Keterangan</label>
+                <input type="text" id="ketMasuk" placeholder="Contoh: Gaji, Freelance, Bonus" required>
+              </div>
+              <div class="form-group">
+                <label>Tanggal & Waktu</label>
+                <input type="datetime-local" id="tanggalMasuk" required>
+              </div>
+              <button type="submit" class="btn btn-green">
+                <i class="fas fa-save"></i> Simpan Pemasukan
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- PENGELUARAN -->
+        <section id="pengeluaran" class="page">
+          <div class="section-box">
+            <h3><i class="fas fa-minus-circle"></i> Tambah Uang Keluar</h3>
+            <form id="formPengeluaran" class="form">
+              <div class="form-group">
+                <label>Jumlah (Rp)</label>
+                <input type="number" id="jumlahKeluar" placeholder="Contoh: 50000" required min="1">
+              </div>
+              <div class="form-group">
+                <label>Keterangan (untuk apa)</label>
+                <input type="text" id="ketKeluar" placeholder="Contoh: Makan siang, Bensin, Belanja bulanan" required>
+              </div>
+              <div class="form-group">
+                <label>Kategori</label>
+                <select id="kategoriKeluar">
+                  <option value="Makanan">Makanan & Minuman</option>
+                  <option value="Transportasi">Transportasi</option>
+                  <option value="Tagihan">Tagihan & Utilitas</option>
+                  <option value="Belanja">Belanja</option>
+                  <option value="Hiburan">Hiburan</option>
+                  <option value="Kesehatan">Kesehatan</option>
+                  <option value="Pendidikan">Pendidikan</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tanggal & Waktu</label>
+                <input type="datetime-local" id="tanggalKeluar" required>
+              </div>
+              <button type="submit" class="btn btn-red">
+                <i class="fas fa-save"></i> Simpan Pengeluaran
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- LAPORAN -->
+        <section id="laporan" class="page">
+          <div class="section-box">
+            <h3><i class="fas fa-filter"></i> Filter Laporan</h3>
+            <div class="filter-row">
+              <div class="form-group">
+                <label>Dari Tanggal</label>
+                <input type="date" id="filterDari">
+              </div>
+              <div class="form-group">
+                <label>Sampai Tanggal</label>
+                <input type="date" id="filterSampai">
+              </div>
+              <button class="btn btn-blue" id="btnFilter">
+                <i class="fas fa-search"></i> Tampilkan
+              </button>
+              <button class="btn btn-outline" id="btnResetFilter">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="cards small">
+            <div class="card card-green">
+              <span class="card-label">Masuk (periode)</span>
+              <span class="card-value" id="laporanMasuk">Rp 0</span>
+            </div>
+            <div class="card card-red">
+              <span class="card-label">Keluar (periode)</span>
+              <span class="card-value" id="laporanKeluar">Rp 0</span>
+            </div>
+            <div class="card card-blue">
+              <span class="card-label">Saldo (periode)</span>
+              <span class="card-value" id="laporanSaldo">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <h3><i class="fas fa-list"></i> Daftar Transaksi</h3>
+            <div class="table-wrapper">
+              <table id="tabelLaporan">
+                <thead>
+                  <tr>
+                    <th>Tanggal & Waktu</th>
+                    <th>Jenis</th>
+                    <th>Keterangan</th>
+                    <th>Kategori</th>
+                    <th>Jumlah</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelLaporanBody">
+                  <tr><td colspan="6" class="empty">Belum ada data</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- WISHLIST -->
+        <section id="wishlist" class="page">
+          <div class="section-box">
+            <h3><i class="fas fa-plus"></i> Tambah Wishlist</h3>
+            <form id="formWishlist" class="form inline">
+              <div class="form-group">
+                <label>Nama Barang / Tujuan</label>
+                <input type="text" id="wishNama" placeholder="Contoh: Laptop baru, Liburan Bali" required>
+              </div>
+              <div class="form-group">
+                <label>Harga Target (Rp)</label>
+                <input type="number" id="wishHarga" placeholder="Contoh: 10000000" required min="1">
+              </div>
+              <div class="form-group">
+                <label>Prioritas</label>
+                <select id="wishPrioritas">
+                  <option value="Tinggi">Tinggi</option>
+                  <option value="Sedang" selected>Sedang</option>
+                  <option value="Rendah">Rendah</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-purple">
+                <i class="fas fa-plus"></i> Tambah
+              </button>
+            </form>
+          </div>
+
+          <div class="section-box">
+            <h3><i class="fas fa-heart"></i> Daftar Wishlist</h3>
+            <div id="wishlistList" class="wishlist-grid">
+              <p class="empty">Belum ada wishlist</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- CATATAN -->
+        <section id="catatan" class="page">
+          <div class="section-box">
+            <h3><i class="fas fa-plus"></i> Tambah Catatan</h3>
+            <form id="formCatatan" class="form">
+              <div class="form-group">
+                <label>Judul</label>
+                <input type="text" id="catatanJudul" placeholder="Judul catatan" required>
+              </div>
+              <div class="form-group">
+                <label>Isi Catatan</label>
+                <textarea id="catatanIsi" rows="4" placeholder="Tulis catatan keuangan atau rencana di sini..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-blue">
+                <i class="fas fa-save"></i> Simpan Catatan
+              </button>
+            </form>
+          </div>
+
+          <div class="section-box">
+            <h3><i class="fas fa-sticky-note"></i> Daftar Catatan</h3>
+            <div id="catatanList" class="notes-list">
+              <p class="empty">Belum ada catatan</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TARGET TABUNGAN -->
+        <section id="target" class="page">
+          <div class="section-box">
+            <h3><i class="fas fa-bullseye"></i> Atur Target Tabungan</h3>
+            <form id="formTarget" class="form">
+              <div class="form-group">
+                <label>Nama Target</label>
+                <input type="text" id="targetNama" placeholder="Contoh: Dana Darurat, DP Rumah" required>
+              </div>
+              <div class="form-group">
+                <label>Jumlah Target (Rp)</label>
+                <input type="number" id="targetJumlah" placeholder="Contoh: 20000000" required min="1">
+              </div>
+              <div class="form-group">
+                <label>Jumlah Saat Ini (Rp)</label>
+                <input type="number" id="targetSaatIni" placeholder="Contoh: 5000000" required min="0">
+              </div>
+              <button type="submit" class="btn btn-purple">
+                <i class="fas fa-save"></i> Simpan / Update Target
+              </button>
+            </form>
+          </div>
+
+          <div class="section-box" id="targetDisplay">
+            <h3><i class="fas fa-chart-pie"></i> Progress Target</h3>
+            <div id="targetInfo" class="target-box">
+              <p class="empty">Belum ada target tabungan. Silakan buat di atas.</p>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <h3><i class="fas fa-plus-circle"></i> Tambah ke Target</h3>
+            <form id="formTambahTarget" class="form inline">
+              <div class="form-group">
+                <label>Jumlah yang ditabung (Rp)</label>
+                <input type="number" id="tambahTargetJumlah" placeholder="Contoh: 500000" required min="1">
+              </div>
+              <button type="submit" class="btn btn-green">
+                <i class="fas fa-plus"></i> Tambah
+              </button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- GERBANG SANDI -->
+  <div class="auth-view" id="lockView">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <i class="fas fa-wallet"></i>
+        <span>KeuanganKu</span>
+      </div>
+
+      <div id="lockSetup">
+        <h1 id="setupTitle">Buat sandi aplikasi</h1>
+        <p class="auth-description" id="setupDescription">
+          Sandi ini diminta setiap kali aplikasi dibuka di perangkat ini. Minimal 6 karakter.
+        </p>
+        <form id="formSetupSandi" class="form" novalidate>
+          <div class="form-group">
+            <label for="sandiBaru">Sandi baru</label>
+            <input type="password" id="sandiBaru" autocomplete="new-password" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label for="sandiKonfirmasi">Ulangi sandi</label>
+            <input type="password" id="sandiKonfirmasi" autocomplete="new-password" minlength="6" required>
+          </div>
+          <button type="submit" class="btn btn-blue">
+            <i class="fas fa-shield-alt"></i> Simpan sandi
+          </button>
+        </form>
+        <p class="auth-message" id="setupMessage" role="alert"></p>
+      </div>
+
+      <div id="lockUnlock" hidden>
+        <h1>Masukkan sandi</h1>
+        <p class="auth-description">Aplikasi terkunci. Masukkan sandi untuk melanjutkan.</p>
+        <form id="formUnlock" class="form" novalidate>
+          <div class="form-group">
+            <label for="sandiMasuk">Sandi</label>
+            <input type="password" id="sandiMasuk" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn btn-blue">
+            <i class="fas fa-unlock"></i> Buka
+          </button>
+        </form>
+        <p class="auth-message" id="unlockMessage" role="alert"></p>
+        <button type="button" class="link-button" id="showRecoveryButton">
+          Lupa sandi? Pakai kode pemulihan
+        </button>
+      </div>
+
+      <div id="lockRecovery" hidden>
+        <h1>Kode pemulihan</h1>
+        <p class="auth-description">
+          Masukkan kode pemulihan yang kamu simpan saat membuat sandi.
+        </p>
+        <form id="formRecovery" class="form" novalidate>
+          <div class="form-group">
+            <label for="kodePemulihan">Kode pemulihan</label>
+            <input type="text" id="kodePemulihan" autocomplete="off" spellcheck="false"
+              placeholder="Contoh: K7M2-9QX4" required>
+          </div>
+          <button type="submit" class="btn btn-blue">
+            <i class="fas fa-key"></i> Verifikasi kode
+          </button>
+        </form>
+        <p class="auth-message" id="recoveryMessage" role="alert"></p>
+        <button type="button" class="link-button" id="kembaliKeUnlock">
+          Kembali ke masuk sandi
+        </button>
+      </div>
+
+      <div id="lockRecoveryCode" hidden>
+        <h1>Simpan kode pemulihan</h1>
+        <p class="auth-description">
+          Kode ini satu-satunya cara masuk jika kamu lupa sandi. Simpan di tempat aman
+          dan jangan dibagikan.
+        </p>
+        <div class="recovery-code" id="recoveryCodeValue"></div>
+        <div class="recovery-actions">
+          <button type="button" class="btn btn-outline" id="copyRecoveryButton">
+            <i class="fas fa-copy"></i> Salin
+          </button>
+          <button type="button" class="btn btn-blue" id="confirmRecoveryButton">
+            <i class="fas fa-check"></i> Sudah disimpan
+          </button>
+        </div>
+        <p class="auth-message" id="recoveryCodeMessage" role="status"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL UBAH SANDI -->
+  <div class="modal" id="passwordModal" hidden>
+    <div class="auth-card">
+      <h1>Ubah sandi</h1>
+      <p class="auth-description">Masukkan sandi saat ini, lalu tentukan sandi baru.</p>
+      <form id="formUbahSandi" class="form" novalidate>
+        <div class="form-group">
+          <label for="sandiLama">Sandi saat ini</label>
+          <input type="password" id="sandiLama" autocomplete="current-password" required>
+        </div>
+        <div class="form-group">
+          <label for="sandiBaruUbah">Sandi baru</label>
+          <input type="password" id="sandiBaruUbah" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="sandiKonfirmasiUbah">Ulangi sandi baru</label>
+          <input type="password" id="sandiKonfirmasiUbah" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="batalUbahSandi">Batal</button>
+          <button type="submit" class="btn btn-blue">
+            <i class="fas fa-save"></i> Simpan
+          </button>
+        </div>
+      </form>
+      <p class="auth-message" id="ubahSandiMessage" role="alert"></p>
+    </div>
+  </div>
+
+  <script type="module" src="system.js"></script>
+</body>
+</html>
